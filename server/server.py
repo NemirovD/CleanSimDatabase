@@ -5,6 +5,7 @@ import socket
 import MySQLdb
 import datetime
 import hashlib
+import traceback
 
 db = peewee.MySQLDatabase('cleanServ', user='cleanServer', passwd='pass')
 
@@ -71,12 +72,9 @@ def setup():
 	UserSimInfo.create_table()
 	KeywordSimInfo.create_table()
 
-def init(init):
-	if init == 1:
-		clean()
-		setup()
 
-def add(datadict):
+
+def add(datadict, conn):
 	descr = datadict['Description'][0]
 	sim = Simulation(description=descr)
 	sim.save()
@@ -115,21 +113,89 @@ def add(datadict):
 		fsinfo = FileSimInfo(sid=sim.id, fid=frow.id)
 		fsinfo.save()
 
-def search(datadict):
+	result = {}
+	result['type'] = 'confirmation'
+	result['message'] = 'Added Successfully'
+	conn.sendall(json.dumps(result))
+
+def search(datadict, conn):
 	#the data dict should probably only contain a query
+	query = 0
+	if datadict['Keywords'] == None:
+		query = Simulation.select(Simulation.id).\
+					join(UserSimInfo).\
+					join(User).\
+					where(User.uname << datadict['Name']).\
+					distinct().naive()
+	elif datadict['Name'] == None:
+		query = Simulation.select(Simulation.id).\
+					join(KeywordSimInfo).\
+					join(Keyword).\
+					where(Keyword.keyword << datadict['Keywords']).\
+					distinct().naive()
+	elif len(datadict['Keywords']) > 0 and len(datadict['Name']) > 0:
+		query = Simulation.select(Simulation.id).\
+					join(KeywordSimInfo).\
+					join(Keyword).\
+					where(Keyword.keyword << datadict['Keywords']).\
+					switch(Simulation).\
+					join(UserSimInfo).\
+					join(User).\
+					where(User.uname << datadict['Name']).\
+					distinct().naive()
+
+	print query
+	results = {}
+	rows = []
+	for val in query:
+		result = {}
+		simres = Simulation.select().where(Simulation.id == val.id).get()
+		result['description'] = simres.description
+		result['date'] = str(simres.date)
+		result['users'] = []
+		for res in User.select().\
+					join(UserSimInfo).\
+					join(Simulation).\
+					where(Simulation.id == val.id):
+			result['users'].append(res.uname)
+
+		result['keywords'] = []
+		for res in Keyword.select().\
+					join(KeywordSimInfo).\
+					join(Simulation).\
+					where(Simulation.id == val.id):
+			result['keywords'].append(res.keyword)
+		rows.append(result)
+
+	results['type'] = 'rows'
+	results['data'] = rows
+	conn.sendall(json.dumps(results))
+		
+		# val.id, val.uname, val.description, val.date
+
 	return
 
-def parse(datadict):
+def grab(datadict):
+	return
+
+def parse(datadict, conn):
 	mType = datadict['MessageType'][0]
 	if mType == 'ADD':
-		add(datadict)
+		add(datadict, conn)
 	elif mType == 'SEARCH':
-		search(datadict)
+		search(datadict, conn)
+	elif mType == 'GRAB':
+		grab(datadict)
 	else:
 		return
 
+def init(init):
+	if init == 1:
+		clean()
+		setup()
+
 def main():
-	init(1)
+	init(0)
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.bind(('localhost', 9999))
 	sock.listen(1)
@@ -140,17 +206,20 @@ def main():
 			print "Waiting for connection"
 			conn, addr = sock.accept()
 			datadict = json.loads(conn.recv(4096))
-			parse(datadict)
+			parse(datadict, conn)
 
 		except KeyboardInterrupt:
+			sock.close()
 			if conn != None:
 				conn.close()
-			sock.close()
-			print ""
+			print "exiting"
 			break
 
 		except Exception, e:
-			print 'Unexpected error:', str(e)
+			traceback.print_exc()
+			sock.close()
+			break
+
 
 		finally:
 			if conn != None:
