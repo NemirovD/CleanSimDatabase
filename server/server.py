@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 import peewee
@@ -29,6 +30,7 @@ class User(BaseModel):
 	id = peewee.PrimaryKeyField()
 	uname = peewee.CharField(unique=True)
 	pword = peewee.CharField(null=True)
+	salty = peewee.CharField(null=True)
 
 class Keyword(BaseModel):
 	id = peewee.PrimaryKeyField()
@@ -89,7 +91,7 @@ def add(datadict, conn):
 		ksinfo = KeywordSimInfo(sid=sim.id, kid=kword.id)		
 		ksinfo.save()
 
-	for uname in datadict['Name']:
+	for uname in datadict['Users']:
 		if not User.select().where(User.uname == uname).exists():
 			name = User(uname=uname)
 			name.save()
@@ -126,15 +128,15 @@ def search(datadict, conn):
 		query = Simulation.select(Simulation.id).\
 					join(UserSimInfo).\
 					join(User).\
-					where(User.uname << datadict['Name']).\
+					where(User.uname << datadict['Users']).\
 					distinct().naive()
-	elif datadict['Name'] == None:
+	elif datadict['Users'] == None:
 		query = Simulation.select(Simulation.id).\
 					join(KeywordSimInfo).\
 					join(Keyword).\
 					where(Keyword.keyword << datadict['Keywords']).\
 					distinct().naive()
-	elif len(datadict['Keywords']) > 0 and len(datadict['Name']) > 0:
+	elif len(datadict['Keywords']) > 0 and len(datadict['Users']) > 0:
 		query = Simulation.select(Simulation.id).\
 					join(KeywordSimInfo).\
 					join(Keyword).\
@@ -142,37 +144,38 @@ def search(datadict, conn):
 					switch(Simulation).\
 					join(UserSimInfo).\
 					join(User).\
-					where(User.uname << datadict['Name']).\
+					where(User.uname << datadict['Users']).\
 					distinct().naive()
 
 	results = {}
-	rows = []
-	for val in query:
-		result = {}
-		simres = Simulation.select().where(Simulation.id == val.id).get()
-		result['description'] = simres.description
-		result['date'] = str(simres.date)
-		result['users'] = []
-		for res in User.select().\
-					join(UserSimInfo).\
-					join(Simulation).\
-					where(Simulation.id == val.id):
-			result['users'].append(res.uname)
+	if query.exists():
+		rows = []
+		for val in query:
+			result = {}
+			simres = Simulation.select().where(Simulation.id == val.id).get()
+			result['description'] = simres.description
+			result['date'] = str(simres.date)
+			result['users'] = []
+			for res in User.select().\
+						join(UserSimInfo).\
+						join(Simulation).\
+						where(Simulation.id == val.id):
+				result['users'].append(res.uname)
 
-		result['keywords'] = []
-		for res in Keyword.select().\
-					join(KeywordSimInfo).\
-					join(Simulation).\
-					where(Simulation.id == val.id):
-			result['keywords'].append(res.keyword)
-		rows.append(result)
+			result['keywords'] = []
+			for res in Keyword.select().\
+						join(KeywordSimInfo).\
+						join(Simulation).\
+						where(Simulation.id == val.id):
+				result['keywords'].append(res.keyword)
+			rows.append(result)
 
-	results['type'] = 'rows'
-	results['data'] = rows
+		results['type'] = 'rows'
+		results['data'] = rows
+	else:
+		results['type'] = 'textresponse'
+		results['message'] = 'No Simulations found using search terms'
 	conn.sendall(json.dumps(results))
-		
-		# val.id, val.uname, val.description, val.date
-
 	return
 
 def grab(datadict):
