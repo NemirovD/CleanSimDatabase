@@ -178,14 +178,19 @@ def search(datadict, conn):
 def grab(datadict):
 	return
 
+def register(datadict):
+	return
+
 def parse(datadict, conn):
-	mType = datadict['MessageType'][0]
+	mType = datadict['MessageType']
 	if mType == 'ADD':
 		add(datadict, conn)
 	elif mType == 'SEARCH':
 		search(datadict, conn)
 	elif mType == 'GRAB':
 		grab(datadict)
+	elif mType == 'REGISTER':
+		register(datadict)
 	else:
 		res = {
 			'type' : 'textresponse',

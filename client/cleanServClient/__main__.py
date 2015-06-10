@@ -1,41 +1,35 @@
-import parser
-import fileloader
+from parser import parseResponse, parseFile
+from fileloader import loadFiles
+from samplegenerator import writeSample
 import json
-import textwrap
 import socket
+import argparse
 
-def prettyPrintResponse(res):
-	for row in res['data']:
-		print "Names:",
-		for name in row['users']:
-			print name,
+parser = argparse.ArgumentParser(description="This is a program to upload simulation information to the CLEAN Database")
+parser.add_argument("command", help="The command to send to the database. Options are REGISTER, SEARCH, GRAB and ADD. Ignored only if -s is set.", nargs='?',default=False)
+parser.add_argument("configfile", help="The configfile that contains information to send to the database. Ignored only if -s is set.",nargs='?',default=False)
+parser.add_argument("-s","--sample-output", help="Writes a sample output file to stdout. This command makes the program ignore position arguments", action="store_true")
+args = parser.parse_args()
 
-		print "| Date:", row['date']
+if args.sample_output:
+	writeSample()
+	exit(0)
 
-		print wrapper.fill(row['description'])
+if not (args.configfile or args.command):
+	print "Incorrect Arguments"
+	parser.print_help()
+	exit(0)
 
-		print "Keywords:",
-		print ", ".join(row['keywords'])
-		print ""
-
-def parseResponse(res):
-	if res['type'] == 'rows':
-		prettyPrintResponse(res)
-	elif res['type'] == 'textresponse':
-		print res['message']
-
-prefix = "Description: "
-wrapper = textwrap.TextWrapper(initial_indent=prefix, width=70,
-                               subsequent_indent=' '*len(prefix))
 
 saddr = ('localhost', 9999)
 
 #parse and load data
-datadict = parser.parseFile('configSchema.txt')
-datadict = fileloader.loadFiles(datadict)
+datadict = parseFile(args.configfile)
+datadict = loadFiles(datadict)
+datadict['MessageType'] = str(args.command).upper()
 
 #json data for sending
-message = json.dumps(datadict, -1)
+message = json.dumps(datadict)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect(saddr)

@@ -7,6 +7,11 @@ def loadFiles(datadict):
 
 def getData(filename):
 	f = {}
-	with open(filename, 'r') as myfile:
-		f = {'filename':filename, 'data': myfile.read()}
-	return f
+	try :
+		with open(filename, 'r') as myfile:
+			f = {'filename':filename, 'data': myfile.read()}
+		return f
+	except Exception, e:
+		print "Could not open file specified in config: " + filename
+		print e
+		exit(0)

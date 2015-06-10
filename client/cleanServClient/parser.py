@@ -1,3 +1,5 @@
+import textwrap
+
 def parseFile(filename):
 	datadict = {}
 	f = open(filename, 'r')
@@ -29,3 +31,27 @@ def parseFile(filename):
 		datadict[dtype] = tlist
 
 	return datadict
+
+prefix = "Description: "
+wrapper = textwrap.TextWrapper(initial_indent=prefix, width=70,
+                               subsequent_indent=' '*len(prefix))
+
+def prettyPrintResponse(res):
+	for row in res['data']:
+		print "Names:",
+		for name in row['users']:
+			print name,
+
+		print "| Date:", row['date']
+
+		print wrapper.fill(row['description'])
+
+		print "Keywords:",
+		print ", ".join(row['keywords'])
+		print ""
+
+def parseResponse(res):
+	if res['type'] == 'rows':
+		prettyPrintResponse(res)
+	elif res['type'] == 'textresponse':
+		print res['message']

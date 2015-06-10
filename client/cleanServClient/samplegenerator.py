@@ -1,6 +1,6 @@
-# Comments begin with a hashtag
+sample = """# Comments begin with a hashtag
 
-# Name of the data type will be against the wall
+# Name of the data type will be untabbed words
 # The value of the named data type will be after a tab character
 
 #The General Design is
@@ -32,3 +32,7 @@ inputfiles
 	configSchema.txt
 
 outputfiles
+"""
+
+def writeSample():
+	print sample
