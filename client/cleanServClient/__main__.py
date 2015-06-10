@@ -18,7 +18,9 @@ if args.sample_output:
 	writeSample()
 	exit(0)
 
-if not (args.configfile or args.command):
+mType = str(args.command).upper()
+
+if not (args.configfile and args.command) and not mType == 'REGISTER':
 	print "Incorrect Arguments"
 	parser.print_help()
 	exit(0)
@@ -30,12 +32,14 @@ pword = getpass()
 
 saddr = ('localhost', 9999)
 
-#parse and load data
-datadict = parseFile(args.configfile)
-datadict = loadFiles(datadict)
+datadict = {}
+if mType != 'REGISTER':
+	#parse and load data
+	datadict = parseFile(args.configfile)
+	datadict = loadFiles(datadict)
 datadict['User'] = uname
 datadict['Pass'] = pword
-datadict['MessageType'] = str(args.command).upper()
+datadict['MessageType'] = mType
 
 #json data for sending
 message = json.dumps(datadict)

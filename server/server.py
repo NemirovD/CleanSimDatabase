@@ -30,7 +30,7 @@ class User(BaseModel):
 	id = peewee.PrimaryKeyField()
 	uname = peewee.CharField(unique=True)
 	pword = peewee.CharField(null=True)
-	salty = peewee.CharField(null=True)
+	salt = peewee.CharField(null=True)
 
 class Keyword(BaseModel):
 	id = peewee.PrimaryKeyField()
@@ -91,13 +91,10 @@ def add(datadict, conn):
 		ksinfo = KeywordSimInfo(sid=sim.id, kid=kword.id)		
 		ksinfo.save()
 
-	for uname in datadict['Users']:
-		if not User.select().where(User.uname == uname).exists():
-			name = User(uname=uname)
-			name.save()
-		nam = User.select().where(User.uname == uname).get()
-		usinfo = UserSimInfo(sid=sim.id, uid=nam.id)
-		usinfo.save()
+	uname = datadict['User']
+	nam = User.select().where(User.uname == uname).get()
+	usinfo = UserSimInfo(sid=sim.id, uid=nam.id)
+	usinfo.save()
 
 	for f in datadict['inputfiles']:
 		filename = f['filename']
@@ -178,28 +175,71 @@ def search(datadict, conn):
 	conn.sendall(json.dumps(results))
 	return
 
-def grab(datadict):
+def grab(datadict, conn):
+	pass
+
+def register(datadict, conn):
+	res = {'type' : 'textresponse'}
+	query = User.select().where(User.uname == datadict['User'])
+	if query.exists():
+		#User already exists with that name
+		res['message'] = 'User already exists with that name'
+	else:
+		newUser = User()
+		newUser.uname = datadict['User']
+		newUser.salt = os.urandom(16).encode('hex')
+		p = hashlib.sha1(newUser.salt + datadict['Pass']).hexdigest()
+		newUser.pword = p
+		newUser.save()
+		print newUser.salt
+		print newUser.pword
+		print hashlib.sha1(newUser.salt + datadict['Pass']).hexdigest()
+		res['message'] = 'User Registered Successfully'
+	conn.sendall(json.dumps(res))
 	return
 
-def register(datadict):
-	return
+def authenticate(datadict):
+	row = User.select().where(User.uname == datadict['User'])
+	if row.exists():
+		uname = datadict['User']
+		pword = datadict['Pass']
+		userRow = row.get()
+
+		print pword
+
+		possiblePass = hashlib.sha1(userRow.salt + pword).hexdigest()
+		print userRow.pword
+		if userRow.pword == possiblePass:
+			return True
+
+	return False
 
 def parse(datadict, conn):
 	mType = datadict['MessageType']
-	if mType == 'ADD':
-		add(datadict, conn)
-	elif mType == 'SEARCH':
-		search(datadict, conn)
-	elif mType == 'GRAB':
-		grab(datadict)
-	elif mType == 'REGISTER':
-		register(datadict)
+	if mType == 'REGISTER':
+		register(datadict, conn)
+		return
+
+	if authenticate(datadict):
+		if mType == 'ADD':
+			add(datadict, conn)
+		elif mType == 'SEARCH':
+			search(datadict, conn)
+		elif mType == 'GRAB':
+			grab(datadict, conn)
+		else:
+			res = {
+				'type' : 'textresponse',
+				'message' : 'Invalid Message Type: '+mType
+			}
+			conn.sendall(json.dumps(res))
 	else:
 		res = {
 			'type' : 'textresponse',
-			'message' : 'Invalid Message Type: '+mType
+			'message' : 'Could Not authenticate User'
 		}
 		conn.sendall(json.dumps(res))
+
 
 def init(init):
 	if init == 1:
@@ -221,9 +261,9 @@ def main():
 			parse(datadict, conn)
 
 		except KeyboardInterrupt:
-			sock.close()
 			if conn != None:
 				conn.close()
+			sock.close()
 			print "exiting"
 			break
 
