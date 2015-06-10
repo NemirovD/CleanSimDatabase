@@ -18,18 +18,15 @@
 #	outputfiles
 
 Name
-	David
+	Taylor
 
 MessageType
-	ADD
+	SEARCH
 
 Description
-	This is a description of the run in question.
+	Let's make this a really really long description so hopefully it'll wrap. This simulation was designed to do very import stuff, as are all simulations that are on this database.
 
 Keywords
-	water
-	H2O
-	ice
 
 inputfiles
 	configSchema.txt

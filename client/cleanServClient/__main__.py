@@ -4,6 +4,26 @@ import json
 import textwrap
 import socket
 
+def prettyPrintResponse(res):
+	for row in res['data']:
+		print "Names:",
+		for name in row['users']:
+			print name,
+
+		print "| Date:", row['date']
+
+		print wrapper.fill(row['description'])
+
+		print "Keywords:",
+		print ", ".join(row['keywords'])
+		print ""
+
+def parseResponse(res):
+	if res['type'] == 'rows':
+		prettyPrintResponse(res)
+	elif res['type'] == 'textresponse':
+		print res['message']
+
 prefix = "Description: "
 wrapper = textwrap.TextWrapper(initial_indent=prefix, width=70,
                                subsequent_indent=' '*len(prefix))
@@ -22,20 +42,8 @@ sock.connect(saddr)
 try:
 	sock.sendall(message)
 	test = sock.recv(4096)
-	res = json.loads(test)
-	if res['type'] == 'rows':
-		for row in res['data']:
-			print "Names:",
-			for name in row['users']:
-				print name,
-
-			print "| Date:", row['date']
-
-			print wrapper.fill(row['description'])
-
-			print "Keywords:",
-			print ", ".join(row['keywords'])
-			print ""
+	parseResponse(json.loads(test))
+		
 except ValueError, e:
 	print str(e)
 finally:

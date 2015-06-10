@@ -28,6 +28,7 @@ class File(BaseModel):
 class User(BaseModel):
 	id = peewee.PrimaryKeyField()
 	uname = peewee.CharField(unique=True)
+	pword = peewee.CharField(null=True)
 
 class Keyword(BaseModel):
 	id = peewee.PrimaryKeyField()
@@ -114,7 +115,7 @@ def add(datadict, conn):
 		fsinfo.save()
 
 	result = {}
-	result['type'] = 'confirmation'
+	result['type'] = 'textresponse'
 	result['message'] = 'Added Successfully'
 	conn.sendall(json.dumps(result))
 
@@ -144,7 +145,6 @@ def search(datadict, conn):
 					where(User.uname << datadict['Name']).\
 					distinct().naive()
 
-	print query
 	results = {}
 	rows = []
 	for val in query:
@@ -187,7 +187,11 @@ def parse(datadict, conn):
 	elif mType == 'GRAB':
 		grab(datadict)
 	else:
-		return
+		res = {
+			'type' : 'textresponse',
+			'message' : 'Invalid Message Type: '+mType
+		}
+		conn.sendall(json.dumps(res))
 
 def init(init):
 	if init == 1:
