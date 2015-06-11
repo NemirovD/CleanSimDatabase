@@ -7,6 +7,8 @@ import MySQLdb
 import datetime
 import hashlib
 import traceback
+import socket
+from OpenSSL import SSL
 
 db = peewee.MySQLDatabase('cleanServ', user='cleanServer', passwd='pass')
 
@@ -29,8 +31,8 @@ class File(BaseModel):
 class User(BaseModel):
 	id = peewee.PrimaryKeyField()
 	uname = peewee.CharField(unique=True)
-	pword = peewee.CharField(null=True)
-	salt = peewee.CharField(null=True)
+	pword = peewee.CharField()
+	salt = peewee.CharField()
 
 class Keyword(BaseModel):
 	id = peewee.PrimaryKeyField()
@@ -191,9 +193,6 @@ def register(datadict, conn):
 		p = hashlib.sha1(newUser.salt + datadict['Pass']).hexdigest()
 		newUser.pword = p
 		newUser.save()
-		print newUser.salt
-		print newUser.pword
-		print hashlib.sha1(newUser.salt + datadict['Pass']).hexdigest()
 		res['message'] = 'User Registered Successfully'
 	conn.sendall(json.dumps(res))
 	return
@@ -205,13 +204,9 @@ def authenticate(datadict):
 		pword = datadict['Pass']
 		userRow = row.get()
 
-		print pword
-
 		possiblePass = hashlib.sha1(userRow.salt + pword).hexdigest()
-		print userRow.pword
 		if userRow.pword == possiblePass:
 			return True
-
 	return False
 
 def parse(datadict, conn):
@@ -248,7 +243,12 @@ def init(init):
 
 def main():
 	init(0)
+	context = SSL.Context(SSL.SSLv23_METHOD)
+	context.use_privatekey_file('key')
+	context.use_certificate_file('cert')
+
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock = SSL.Connection(context, sock)
 	sock.bind(('localhost', 9999))
 	sock.listen(1)
 	conn = None

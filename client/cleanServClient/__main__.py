@@ -1,3 +1,4 @@
+import ssl
 import json
 import socket
 import argparse
@@ -30,8 +31,6 @@ if not uname:
 	uname = raw_input("Username: ")
 pword = getpass()
 
-saddr = ('localhost', 9999)
-
 datadict = {}
 if mType != 'REGISTER':
 	#parse and load data
@@ -44,10 +43,13 @@ datadict['MessageType'] = mType
 #json data for sending
 message = json.dumps(datadict)
 
+saddr = ('localhost', 9999)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock = ssl.wrap_socket(sock)
 sock.connect(saddr)
 try:
 	sock.sendall(message)
+	print sock.cipher()
 	test = sock.recv(4096)
 	parseResponse(json.loads(test))
 		
