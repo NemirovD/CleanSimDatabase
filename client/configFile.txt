@@ -1,21 +1,27 @@
 # Comments begin with a hashtag
 
-# Name of the data type will be against the wall
-# The value of the named data type will be after a tab character
-
-#The General Design is
-#DataType
+# The General Design is
+# DataType
 #	Value
 #	Another Value
 
 # Datatypes
-#	MessageType
-#		ADD OR SEARCH
-#	Name
+#	Users
 #	Description
 #	Keywords
 #	inputfiles
 #	outputfiles
+
+# A config file is used when someone wants to add to or search the database
+# The relevant fields when searching are:
+# 		Users
+#		Keywords
+# 		Date  		(Date Added) (Uses ISO standard YYYY-MM-DD)
+# The relevant fields when adding are:
+#		Description
+#		Keywords
+#		inputfiles
+#		outputfiles
 
 Users
 	Taylor

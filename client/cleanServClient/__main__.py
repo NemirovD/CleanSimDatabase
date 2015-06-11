@@ -1,22 +1,22 @@
 import ssl
 import json
 import socket
+import strings
 import argparse
 from getpass import getpass
 from fileloader import loadFiles
-from samplegenerator import writeSample
 from parser import parseResponse, parseFile
 
-parser = argparse.ArgumentParser(description="This is a program to upload simulation information to the CLEAN Database")
-parser.add_argument("command", help="The command to send to the database. Options are REGISTER, SEARCH, GRAB and ADD. Ignored only if -s is set.", nargs='?',default=False)
-parser.add_argument("configfile", help="The configfile that contains information to send to the database. Ignored only if -s is set.",nargs='?',default=False)
-parser.add_argument("-s","--sample-output", help="Writes a sample output file to stdout. This command makes the program ignore positional arguments.", action="store_true")
-parser.add_argument("-u","--user", help="Specifies the User that will be uploading the server data. If no user specified the user will be prompted.",nargs='?', default=False)
+parser = argparse.ArgumentParser(description=strings.description)
+parser.add_argument("command", help=strings.commandhelp, nargs='?',default=False)
+parser.add_argument("configfile", help=strings.configfilehelp,nargs='?',default=False)
+parser.add_argument("-s","--sample-output", help=strings.samplehelp, action="store_true")
+parser.add_argument("-u","--user", help=strings.userhelp,nargs='?', default=False)
 
 args = parser.parse_args()
 
 if args.sample_output:
-	writeSample()
+	print strings.samplefile
 	exit(0)
 
 mType = str(args.command).upper()
