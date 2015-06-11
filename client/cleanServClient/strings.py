@@ -50,23 +50,23 @@ samplefile = \
 # The relevant fields when searching are:
 # 		Users
 #		Keywords
-# 		Date  		(Date Added) (Uses ISO standard YYYY-MM-DD)
+# 		Date  		(Date Added) (Uses ISO standard YYYY-MM-DD) (Not Implemented yet)
 # The relevant fields when adding are:
 #		Description
 #		Keywords
 #		inputfiles
 #		outputfiles
 
-Users
-	Taylor
-
 Description
 	Let's make this a really really long description so hopefully it'll wrap. This simulation was designed to do very import stuff, as are all simulations that are on this database.
 
 Keywords
+	test
+	t
+	yes
 
 inputfiles
-	configFile.txt
+	INCAR
 
 outputfiles
 """

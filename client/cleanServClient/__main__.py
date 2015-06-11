@@ -49,7 +49,6 @@ sock = ssl.wrap_socket(sock)
 sock.connect(saddr)
 try:
 	sock.sendall(message)
-	print sock.cipher()
 	test = sock.recv(4096)
 	parseResponse(json.loads(test))
 		

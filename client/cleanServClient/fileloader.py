@@ -1,7 +1,7 @@
 def loadFiles(datadict):
-	if datadict['inputfiles'] is not None:
+	if 'inputfiles' in datadict and datadict['inputfiles'] is not None:
 		datadict['inputfiles'] = [getData(f) for f in datadict['inputfiles']]
-	if datadict['outputfiles'] is not None:
+	if 'outputfiles' in datadict and datadict['outputfiles'] is not None:
 		datadict['outputfiles'] = [getData(f) for f in datadict['outputfiles']]
 	return datadict
 

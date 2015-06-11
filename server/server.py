@@ -123,19 +123,28 @@ def add(datadict, conn):
 def search(datadict, conn):
 	#the data dict should probably only contain a query
 	query = 0
-	if datadict['Keywords'] == None:
+	noKeywords = 'Keywords' not in datadict or datadict['Keywords'] == None
+	noUsers = 'Users' not in datadict or datadict['Users'] == None
+	if noKeywords and noUsers:
+		res = {
+			'type' : 'textresponse',
+			'message' : 'You need to add Search terms to the config file.'
+		}
+		conn.sendall(json.dumps(res))
+		return
+	elif noKeywords:
 		query = Simulation.select(Simulation.id).\
 					join(UserSimInfo).\
 					join(User).\
 					where(User.uname << datadict['Users']).\
 					distinct().naive()
-	elif datadict['Users'] == None:
+	elif noUsers:
 		query = Simulation.select(Simulation.id).\
 					join(KeywordSimInfo).\
 					join(Keyword).\
 					where(Keyword.keyword << datadict['Keywords']).\
 					distinct().naive()
-	elif len(datadict['Keywords']) > 0 and len(datadict['Users']) > 0:
+	else:
 		query = Simulation.select(Simulation.id).\
 					join(KeywordSimInfo).\
 					join(Keyword).\
@@ -236,13 +245,13 @@ def parse(datadict, conn):
 		conn.sendall(json.dumps(res))
 
 
-def init(init):
-	if init == 1:
+def init(no):
+	if no == 1:
 		clean()
 		setup()
 
 def main():
-	init(0)
+	init(1)
 	context = SSL.Context(SSL.SSLv23_METHOD)
 	context.use_privatekey_file('key')
 	context.use_certificate_file('cert')
