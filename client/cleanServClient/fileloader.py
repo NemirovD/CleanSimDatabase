@@ -15,3 +15,12 @@ def getData(filename):
 		print "Could not open file specified in config: " + filename
 		print e
 		exit(0)
+
+def loadSecret():
+	try :
+		with open('secret','r') as secretfile:
+			return secretfile.read()
+	except Exception, e:
+		print "Could not open file containing secret"
+		print e
+		exit(0)

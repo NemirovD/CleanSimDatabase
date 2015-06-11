@@ -10,6 +10,8 @@ import traceback
 import socket
 from OpenSSL import SSL
 
+secret = ""
+
 db = peewee.MySQLDatabase('cleanServ', user='cleanServer', passwd='pass')
 
 #Base Tables
@@ -192,7 +194,9 @@ def grab(datadict, conn):
 def register(datadict, conn):
 	res = {'type' : 'textresponse'}
 	query = User.select().where(User.uname == datadict['User'])
-	if query.exists():
+	if datadict['Secret'] != secret:
+		res['message'] = 'Your secret does not match the server secret'
+	elif query.exists():
 		#User already exists with that name
 		res['message'] = 'User already exists with that name'
 	else:
@@ -250,8 +254,20 @@ def init(no):
 		clean()
 		setup()
 
+def loadSecret():
+	try :
+		with open('secret','r') as secretfile:
+			return secretfile.read()
+	except Exception, e:
+		print "Could not open file containing secret"
+		print e
+		exit(0)
+
 def main():
+	global secret
+	secret = loadSecret()
 	init(1)
+
 	context = SSL.Context(SSL.SSLv23_METHOD)
 	context.use_privatekey_file('key')
 	context.use_certificate_file('cert')

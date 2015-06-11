@@ -4,7 +4,7 @@ import socket
 import strings
 import argparse
 from getpass import getpass
-from fileloader import loadFiles
+from fileloader import loadFiles, loadSecret
 from parser import parseResponse, parseFile
 
 parser = argparse.ArgumentParser(description=strings.description)
@@ -33,7 +33,7 @@ pwor1 = getpass('Enter a Password: ')
 
 if mType == 'REGISTER':
 	pwor2 = getpass('Confirm Password: ')
-	# secret = raw_input('Enter Shared Secret: ')
+	secret = loadSecret()
 
 if pwor1 != pwor2:
 	print "Passwords don't Match"
@@ -46,7 +46,7 @@ if mType != 'REGISTER':
 	datadict = loadFiles(datadict)
 datadict['User'] = uname
 datadict['Pass'] = pwor1
-# datadict['Secret'] = secret
+datadict['Secret'] = secret
 datadict['MessageType'] = mType
 
 
