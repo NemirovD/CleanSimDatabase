@@ -2,3 +2,4 @@
 *.txt
 server/cert
 server/key
+secret
