@@ -29,7 +29,15 @@ if not (args.configfile and args.command) and not mType == 'REGISTER':
 uname = args.user
 if not uname:
 	uname = raw_input("Username: ")
-pword = getpass()
+pwor1 = getpass('Enter a Password: ')
+
+if mType == 'REGISTER':
+	pwor2 = getpass('Confirm Password: ')
+	# secret = raw_input('Enter Shared Secret: ')
+
+if pwor1 != pwor2:
+	print "Passwords don't Match"
+	exit(0)
 
 datadict = {}
 if mType != 'REGISTER':
@@ -37,8 +45,10 @@ if mType != 'REGISTER':
 	datadict = parseFile(args.configfile)
 	datadict = loadFiles(datadict)
 datadict['User'] = uname
-datadict['Pass'] = pword
+datadict['Pass'] = pwor1
+# datadict['Secret'] = secret
 datadict['MessageType'] = mType
+
 
 #json data for sending
 message = json.dumps(datadict)
