@@ -34,10 +34,9 @@ pwor1 = getpass('Enter a Password: ')
 if mType == 'REGISTER':
 	pwor2 = getpass('Confirm Password: ')
 	secret = loadSecret()
-
-if pwor1 != pwor2:
-	print "Passwords don't Match"
-	exit(0)
+	if pwor1 != pwor2:
+		print "Passwords don't Match"
+		exit(0)
 
 datadict = {}
 if mType != 'REGISTER':
@@ -46,8 +45,10 @@ if mType != 'REGISTER':
 	datadict = loadFiles(datadict)
 datadict['User'] = uname
 datadict['Pass'] = pwor1
-datadict['Secret'] = secret
 datadict['MessageType'] = mType
+
+if mType == 'REGISTER':
+	datadict['Secret'] = secret
 
 
 #json data for sending

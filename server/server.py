@@ -212,6 +212,8 @@ def register(datadict, conn):
 
 def authenticate(datadict):
 	row = User.select().where(User.uname == datadict['User'])
+	print row
+	print row.exists()
 	if row.exists():
 		uname = datadict['User']
 		pword = datadict['Pass']
@@ -274,7 +276,7 @@ def main():
 
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock = SSL.Connection(context, sock)
-	sock.bind(('localhost', 9999))
+	sock.bind(('', 9999))
 	sock.listen(1)
 	conn = None
 
