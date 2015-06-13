@@ -87,35 +87,37 @@ def add(datadict, conn):
 	sim.save()
 
 	sim = Simulation.select(Simulation.id).order_by(Simulation.id.desc()).get()
-	for keyword in datadict['Keywords']:
-		if not Keyword.select(Keyword.id).where(Keyword.keyword == keyword).exists():
-			word = Keyword(keyword=keyword)
-			word.save()
-		kword = Keyword.select(Keyword.id).where(Keyword.keyword == keyword).get()
-		ksinfo = KeywordSimInfo(sid=sim.id, kid=kword.id)		
-		ksinfo.save()
+	if 'keyword' in datadict and datadict['keyword']:
+		for keyword in datadict['Keywords']:
+			if not Keyword.select(Keyword.id).where(Keyword.keyword == keyword).exists():
+				word = Keyword(keyword=keyword)
+				word.save()
+			kword = Keyword.select(Keyword.id).where(Keyword.keyword == keyword).get()
+			ksinfo = KeywordSimInfo(sid=sim.id, kid=kword.id)		
+			ksinfo.save()
 
 	uname = datadict['User']
 	nam = User.select().where(User.uname == uname).get()
 	usinfo = UserSimInfo(sid=sim.id, uid=nam.id)
 	usinfo.save()
 
-	for f in datadict['inputfiles']:
-		filename = f['filename']
-		filedata = f['data']
-		filepath = 'files/'+str(hashlib.md5(filedata).hexdigest())
+	if 'inputfiles' in datadict and datadict['inputfiles']:
+		for f in datadict['inputfiles']:
+			filename = f['filename']
+			filedata = f['data']
+			filepath = 'files/'+str(hashlib.md5(filedata).hexdigest())
 
-		if not File.select().where(File.path == filepath).exists():
-			ff = open(filepath, 'w')
-			ff.write(filedata)
+			if not File.select().where(File.path == filepath).exists():
+				ff = open(filepath, 'w')
+				ff.write(filedata)
 
-			fins = File(name=filename, path=filepath)
-			fins.save()
+				fins = File(name=filename, path=filepath)
+				fins.save()
 
-		frow = File.select(File.id).where(File.path == filepath).get()
+			frow = File.select(File.id).where(File.path == filepath).get()
 
-		fsinfo = FileSimInfo(sid=sim.id, fid=frow.id)
-		fsinfo.save()
+			fsinfo = FileSimInfo(sid=sim.id, fid=frow.id)
+			fsinfo.save()
 
 	result = {}
 	result['type'] = 'textresponse'

@@ -1,3 +1,4 @@
+import re
 import textwrap
 
 def parseFile(filename):
@@ -7,23 +8,33 @@ def parseFile(filename):
 
 	tlist = []
 	for line in f:
-		if line[0] == '#' or line[0] == '\n':
-			#This would be a comment
+		# print line
+		# print re.match('#+.*',line), 'comment'
+		# print re.match('[^#\s]\S+',line), 'datatype'
+		# print re.match('[ \t]+',line), 'value'
+		# print re.match('\s*', line), 'empty'
+		if re.match('#+.*',line):
+			# print "COMMENT", line[:-1]
 			continue
 
-		if line[0] == '\t':
-			# Value
-			tlist.append(line.split('\t')[1].rstrip('\n'))
-
-		else:
-			#Data types
+		elif re.match('[^#\s]\S+',line):
+			# print "DATATYPE", line[:-1]
 			if dtype != None:
 				if len(tlist) == 0:
 					datadict[dtype] = None
 				else:
 					datadict[dtype] = tlist
 				tlist = []
-			dtype = line.rstrip('\n')
+			dtype = line[:-1]
+
+		elif re.match('[ \t]+',line):
+			# print "VALUE", line[:-1]
+			tlist.append(line.lstrip()[:-1])
+
+		elif re.match('\s*', line):
+			# print "EMPTY", line[:-1]
+			continue
+			
 
 	if len(tlist) == 0:
 		datadict[dtype] = None
