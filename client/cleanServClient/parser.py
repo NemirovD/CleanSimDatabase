@@ -8,34 +8,30 @@ def parseFile(filename):
 
 	tlist = []
 	for line in f:
-		# print line
-		# print re.match('#+.*',line), 'comment'
-		# print re.match('[^#\s]\S+',line), 'datatype'
-		# print re.match('[ \t]+',line), 'value'
-		# print re.match('\s*', line), 'empty'
-		if re.match('#+.*',line):
-			# print "COMMENT", line[:-1]
+
+		if not re.match('#*\s*.+', line):
+			# Line is empty
+			continue
+
+		elif re.match('#+.*',line):
+			# Line is a comment
 			continue
 
 		elif re.match('[^#\s]\S+',line):
-			# print "DATATYPE", line[:-1]
+			# The line specifies a datatype
 			if dtype != None:
 				if len(tlist) == 0:
 					datadict[dtype] = None
 				else:
 					datadict[dtype] = tlist
 				tlist = []
-			dtype = line[:-1]
+			dtype = line.rstrip()
 
-		elif re.match('[ \t]+',line):
-			# print "VALUE", line[:-1]
-			tlist.append(line.lstrip()[:-1])
+		elif re.match('[ \t]+.+',line):
+			# The line specifies a value for a datatype
+			tlist.append(line.lstrip().rstrip('\n'))
 
-		elif re.match('\s*', line):
-			# print "EMPTY", line[:-1]
-			continue
-			
-
+	# Needed for the final Datatype
 	if len(tlist) == 0:
 		datadict[dtype] = None
 	else:
