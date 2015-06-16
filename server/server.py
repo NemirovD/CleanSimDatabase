@@ -285,7 +285,13 @@ def main():
 		try:
 			print "Waiting for connection"
 			conn, addr = sock.accept()
-			datadict = json.loads(conn.recv(4096))
+			datalength = long(bytes(conn.recv(4096)))
+			
+			message = ""
+			for i in range(0, datalength, 4096):
+				message += conn.recv(4096)
+
+			datadict = json.loads(message)
 			parse(datadict, conn)
 
 		except KeyboardInterrupt:

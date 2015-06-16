@@ -59,6 +59,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock = ssl.wrap_socket(sock)
 sock.connect(saddr)
 try:
+	sock.sendall(bytes(long(len(message))))
 	sock.sendall(message)
 	test = sock.recv(4096)
 	parseResponse(json.loads(test))
