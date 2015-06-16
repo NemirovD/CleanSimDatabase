@@ -87,7 +87,7 @@ def add(datadict, conn):
 	sim.save()
 
 	sim = Simulation.select(Simulation.id).order_by(Simulation.id.desc()).get()
-	if 'keyword' in datadict and datadict['keyword']:
+	if 'Keywords' in datadict and datadict['Keywords']:
 		for keyword in datadict['Keywords']:
 			if not Keyword.select(Keyword.id).where(Keyword.keyword == keyword).exists():
 				word = Keyword(keyword=keyword)
