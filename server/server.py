@@ -82,7 +82,16 @@ def setup():
 
 
 def add(datadict, conn):
-	descr = datadict['Description'][0]
+	result = {}
+	result['type'] = 'textresponse'
+	descr = None
+	if 'Description' in datadict and datadict['Description']:
+		descr = datadict['Description'][0]
+	else: 
+		result['message'] = 'A simulation must a description'
+		conn.sendall(json.dumps(result))
+		return
+
 	sim = Simulation(description=descr)
 	sim.save()
 
@@ -119,8 +128,7 @@ def add(datadict, conn):
 			fsinfo = FileSimInfo(sid=sim.id, fid=frow.id)
 			fsinfo.save()
 
-	result = {}
-	result['type'] = 'textresponse'
+	
 	result['message'] = 'Added Successfully'
 	conn.sendall(json.dumps(result))
 
@@ -286,7 +294,7 @@ def main():
 			print "Waiting for connection"
 			conn, addr = sock.accept()
 			datalength = long(bytes(conn.recv(4096)))
-			
+
 			message = ""
 			for i in range(0, datalength, 4096):
 				message += conn.recv(4096)
