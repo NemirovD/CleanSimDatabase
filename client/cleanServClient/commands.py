@@ -8,13 +8,14 @@ def badArgs(parser):
 	exit(0)
 
 def getLogin():
-	uname = raw_input("Username: ")
-	upass = getpass('Enter a Password: ')
-	return uname, upass
+	return {
+		'User' : raw_input("Username: "),
+		'Pass' : getpass('Enter a Password: ')
+	}
+	
 
 def enact(command, command_arg,parser):
-	datadict = {}
-	datadict['User'], datadict['Pass'] = getLogin()
+	datadict = getLogin()
 
 	command = str(command).upper()
 	datadict['MessageType'] = command

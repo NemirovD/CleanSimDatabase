@@ -1,3 +1,4 @@
+import sys
 import ssl
 import json
 import socket
@@ -29,15 +30,29 @@ datadict = commands.enact(args.command, args.command_arg, parser)
 #json data for sending
 message = json.dumps(datadict)
 
-saddr = ('localhost', 9999)
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock = ssl.wrap_socket(sock)
-sock.connect(saddr)
+def connect():
+	global sock
+	saddr = ('localhost', 9999)
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock = ssl.wrap_socket(sock)
+	sock.connect(saddr)
 try:
+	connect()
 	sendMessage(sock, message)
-
-	res = recvMessage(sock)
-	parseResponse(json.loads(res))
+	res = json.loads(recvMessage(sock))
+	while 'noauth' in res:
+		print res['message']
+		try:
+			datadict.update(commands.getLogin())
+			message = json.dumps(datadict)
+		except KeyboardInterrupt:
+			sys.stdout.write("\r")
+			exit(0)
+		
+		connect()
+		sendMessage(sock, message)
+		res = json.loads(recvMessage(sock))
+	parseResponse(res)
 		
 except ValueError, e:
 	print str(e)

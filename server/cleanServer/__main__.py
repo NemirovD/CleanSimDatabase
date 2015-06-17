@@ -27,13 +27,14 @@ def parse(datadict, conn):
 				'type' : 'textresponse',
 				'message' : 'Invalid Message Type: '+mType
 			}
-			conn.sendall(json.dumps(res))
+			sendMessage(conn, json.dumps(res))
 	else:
 		res = {
 			'type' : 'textresponse',
-			'message' : 'Could Not authenticate User'
+			'message' : 'Could Not authenticate User',
+			'noauth' : 0
 		}
-		conn.sendall(json.dumps(res))
+		sendMessage(conn, json.dumps(res))
 
 def enactArgs():
 	p = ArgumentParser(description=strings.programDescription)
