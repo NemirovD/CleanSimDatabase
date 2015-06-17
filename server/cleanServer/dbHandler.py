@@ -67,6 +67,24 @@ def authenticateUser(datadict):
 	return False
 
 @db.atomic()
+def changepass(datadict, conn):
+	if 'nPass' in datadict and datadict['nPass']:
+		user = User.select().where(User.uname == datadict['User']).get()
+		user.salt = os.urandom(16).encode('hex')
+		user.pword = hashlib.sha1(user.salt + datadict['nPass']).hexdigest()
+		user.save()
+		res = {
+			'type' : 'textresponse',
+			'message' : 'Password Changed Successfully'
+		}
+	else:
+		res = {
+			'type' : 'textresponse',
+			'message' : 'Failed to Change Password'
+		}
+	sendMessage(conn, json.dumps(res))
+
+@db.atomic()
 def addSimulation(datadict, conn):
 	result = {}
 	result['type'] = 'textresponse'

@@ -22,6 +22,8 @@ def parse(datadict, conn):
 			dbHandler.grabFile(datadict, conn)
 		elif mType == 'GRABALL':
 			dbHandler.grabAllFiles(datadict, conn)
+		elif mType == 'CHANGEPASS':
+			dbHandler.changepass(datadict, conn)
 		else:
 			res = {
 				'type' : 'textresponse',
