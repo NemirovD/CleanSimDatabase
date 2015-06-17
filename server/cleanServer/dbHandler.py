@@ -55,15 +55,16 @@ def registerUser(datadict, conn):
 	return
 
 def authenticateUser(datadict):
-	row = User.select().where(User.uname == datadict['User'])
-	if row.exists():
-		uname = datadict['User']
-		pword = datadict['Pass']
-		userRow = row.get()
+	if 'User' in datadict and 'Pass' in datadict:
+		row = User.select().where(User.uname == datadict['User'])
+		if row.exists():
+			uname = datadict['User']
+			pword = datadict['Pass']
+			userRow = row.get()
 
-		possiblePass = hashlib.sha1(userRow.salt + pword).hexdigest()
-		if userRow.pword == possiblePass:
-			return True
+			possiblePass = hashlib.sha1(userRow.salt + pword).hexdigest()
+			if userRow.pword == possiblePass:
+				return True
 	return False
 
 @db.atomic()

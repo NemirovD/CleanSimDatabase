@@ -41,6 +41,11 @@ Specifies the User that will be uploading the server data.
 If no user specified the user will be prompted.
 """
 
+usemodulehelp = \
+"""
+Allows the user to specify user defined code to automatically create a config file for the client to use.
+"""
+
 samplefile = \
 """
 # Comments begin with a hashtag

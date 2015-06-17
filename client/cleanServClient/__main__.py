@@ -1,3 +1,5 @@
+import imp
+import os.path
 import sys
 import ssl
 import json
@@ -5,16 +7,18 @@ import socket
 import strings
 import commands
 import argparse
-from sockUtils import sendMessage, recvMessage
 from getpass import getpass
-from fileloader import loadFiles, loadSecret
 from parser import parseResponse, parseFile
+from fileloader import loadFiles, loadSecret
+from sockUtils import sendMessage, recvMessage
+
+
 
 parser = argparse.ArgumentParser(description=strings.description)
 parser.add_argument("command", help=strings.commandhelp, nargs='?',default=False)
 parser.add_argument("command_arg", help=strings.commandarghelp,nargs='?',default=False)
 parser.add_argument("-s","--sample-output", help=strings.samplehelp, action="store_true")
-parser.add_argument("-u","--user", help=strings.userhelp,nargs='?', default=False)
+parser.add_argument("-m", "--use-module", help=strings.usemodulehelp, default=False)
 
 args = parser.parse_args()
 
@@ -22,10 +26,18 @@ if args.sample_output:
 	print strings.samplefile
 	exit(0)
 
+if args.use_module and os.path.exists(args.use_module):
+	base = os.path.basename(args.use_module).split(".")[0]
+	extmodule = imp.load_source(base, args.use_module)
+
 if not args.command:
 	commands.badArgs(parser)
 
-datadict = commands.enact(args.command, args.command_arg, parser)
+if args.use_module:
+	datadict = commands.enact(args.command, extmodule, parser)
+else:
+	datadict = commands.enact(args.command, args.command_arg, parser)
+
 
 #json data for sending
 message = json.dumps(datadict)
