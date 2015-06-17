@@ -179,6 +179,19 @@ def searchSimulations(datadict, conn):
 				result['keywords'].append(res.keyword)
 			rows.append(result)
 
+			result['files'] = []
+			for res in File.select().\
+						join(FileSimInfo).\
+						join(Simulation).\
+						where(Simulation.id == val.id).\
+						distinct():
+				t = {
+					"id": res.id,
+					"filename": res.name
+				}
+				result['files'].append(t)
+
+
 		results['type'] = 'rows'
 		results['data'] = rows
 	else:

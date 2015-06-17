@@ -39,9 +39,11 @@ def parseFile(filename):
 
 	return datadict
 
-prefix = "Description: "
-wrapper = textwrap.TextWrapper(initial_indent=prefix, width=70,
+def createTextWrapper(prefix):
+	return textwrap.TextWrapper(initial_indent=prefix,
                                subsequent_indent=' '*len(prefix))
+
+descrwrapper = createTextWrapper("Description: ")
 
 def prettyPrintResponse(res):
 	for row in res['data']:
@@ -51,10 +53,16 @@ def prettyPrintResponse(res):
 
 		print "| Date:", row['date']
 
-		print wrapper.fill(row['description'])
+		print descrwrapper.fill(row['description'])
 
 		print "Keywords:",
 		print ", ".join(row['keywords'])
+		
+		pre = "Files: "
+		fill = (len(pre)-1)*' '
+		print pre
+		for i in row['files']:
+			print fill, "id -", i['id'], "| filename -", i['filename']
 		print ""
 
 def parseResponse(res):
