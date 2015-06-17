@@ -77,3 +77,6 @@ def parseResponse(res):
 		print res['message']
 	elif res['type'] == 'file':
 		filewriter.writefile(res['name'],res['data'])
+	elif res['type'] == 'multifile':
+		for f in res['files']:
+			filewriter.writefile(f['name'],f['data'])

@@ -20,6 +20,8 @@ def parse(datadict, conn):
 			dbHandler.searchSimulations(datadict, conn)
 		elif mType == 'GRAB':
 			dbHandler.grabFile(datadict, conn)
+		elif mType == 'GRABALL':
+			dbHandler.grabAllFiles(datadict, conn)
 		else:
 			res = {
 				'type' : 'textresponse',

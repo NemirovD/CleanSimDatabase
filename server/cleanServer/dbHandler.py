@@ -205,6 +205,14 @@ def grabFile(datadict, conn):
 	response = {}
 	if 'fileid' in datadict and datadict['fileid']:
 		query = File.select().where(File.id == datadict['fileid'])
+	else: 
+		response = {
+			'type' : 'textresponse',
+			'message' : 'You did not input a valid file ID'
+		}
+		sendMessage(conn, json.dumps(response))
+		return
+
 
 	if query.exists():
 		val = query.get()
@@ -217,7 +225,38 @@ def grabFile(datadict, conn):
 	else:
 		response = {
 			'type' : 'textresponse',
-			'Message' : 'There are no files with that ID'
+			'message' : 'There are no files with that ID'
+		}
+	sendMessage(conn, json.dumps(response))
+	return
+
+def grabAllFiles(datadict, conn):
+	response = {}
+	if 'simid' in datadict and datadict['simid']:
+		query = File.select().\
+		join(FileSimInfo).\
+		join(Simulation).\
+		where(Simulation.id == datadict['simid'])
+	else:
+		response = {
+			'type' : 'textresponse',
+			'message' : 'You did not input a valid Simulation ID'
+		}
+		sendMessage(conn, json.dumps(response))
+		return
+
+	if query.exists():
+		response['type'] = 'multifile'
+		response['files'] = []
+		for val in query:
+			response['files'].append({
+				'name' : val.name,
+				'data' : open(val.path, 'r').read()
+			})
+	else:
+		response = {
+			'type' : 'textresponse',
+			'message' : 'There are no Files associated with that Simulation ID'
 		}
 	sendMessage(conn, json.dumps(response))
 	return

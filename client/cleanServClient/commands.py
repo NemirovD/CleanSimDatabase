@@ -32,6 +32,11 @@ def enact(command, command_arg,parser):
 			badArgs()
 		datadict.update(grab(command_arg))
 
+	elif command == 'GRABALL':
+		if not (command and command_arg):
+			badArgs()
+		datadict.update(graball(command_arg))
+
 	return datadict
 
 def register(datadict):
@@ -49,3 +54,6 @@ def updateUsingConfig(configFileName):
 
 def grab(command_arg):
 	return {'fileid' : int(command_arg)}
+
+def graball(command_arg):
+	return {'simid' : int(command_arg)}
