@@ -2,6 +2,7 @@ import json
 import socket
 import strings
 import dbHandler
+from sockUtils import sendMessage, recvMessage
 from traceback import print_exc
 from OpenSSL import SSL
 from argparse import ArgumentParser 
@@ -59,11 +60,7 @@ def main():
 		try:
 			print "Waiting for connection"
 			conn, addr = sock.accept()
-			datalength = long(bytes(conn.recv(4096)))
-
-			message = ""
-			for i in range(0, datalength, 4096):
-				message += conn.recv(4096)
+			message = recvMessage(conn)
 
 			datadict = json.loads(message)
 			parse(datadict, conn)

@@ -2,14 +2,16 @@ import ssl
 import json
 import socket
 import strings
+import commands
 import argparse
+from sockUtils import sendMessage, recvMessage
 from getpass import getpass
 from fileloader import loadFiles, loadSecret
 from parser import parseResponse, parseFile
 
 parser = argparse.ArgumentParser(description=strings.description)
 parser.add_argument("command", help=strings.commandhelp, nargs='?',default=False)
-parser.add_argument("configfile", help=strings.configfilehelp,nargs='?',default=False)
+parser.add_argument("command_arg", help=strings.commandarghelp,nargs='?',default=False)
 parser.add_argument("-s","--sample-output", help=strings.samplehelp, action="store_true")
 parser.add_argument("-u","--user", help=strings.userhelp,nargs='?', default=False)
 
@@ -19,37 +21,10 @@ if args.sample_output:
 	print strings.samplefile
 	exit(0)
 
-mType = str(args.command).upper()
+if not args.command:
+	commands.badArgs(parser)
 
-if not (args.configfile and args.command) and not mType == 'REGISTER':
-	print "Incorrect Arguments"
-	parser.print_help()
-	exit(0)
-
-uname = args.user
-if not uname:
-	uname = raw_input("Username: ")
-pwor1 = getpass('Enter a Password: ')
-
-if mType == 'REGISTER':
-	pwor2 = getpass('Confirm Password: ')
-	secret = loadSecret()
-	if pwor1 != pwor2:
-		print "Passwords don't Match"
-		exit(0)
-
-datadict = {}
-if mType != 'REGISTER':
-	#parse and load data
-	datadict = parseFile(args.configfile)
-	datadict = loadFiles(datadict)
-datadict['User'] = uname
-datadict['Pass'] = pwor1
-datadict['MessageType'] = mType
-
-if mType == 'REGISTER':
-	datadict['Secret'] = secret
-
+datadict = commands.enact(args.command, args.command_arg, parser)
 
 #json data for sending
 message = json.dumps(datadict)
@@ -59,10 +34,10 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock = ssl.wrap_socket(sock)
 sock.connect(saddr)
 try:
-	sock.sendall(bytes(long(len(message))))
-	sock.sendall(message)
-	test = sock.recv(4096)
-	parseResponse(json.loads(test))
+	sendMessage(sock, message)
+
+	res = recvMessage(sock)
+	parseResponse(json.loads(res))
 		
 except ValueError, e:
 	print str(e)

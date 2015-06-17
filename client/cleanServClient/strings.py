@@ -17,6 +17,17 @@ Ignored only if -s is set.
 When using the register command no config file is needed.
 """
 
+commandarghelp = \
+"""
+The argument for a command.
+This will change based on what command you are using.
+For REGISTER, this argument is not needed.
+For ADD, this argument will be a configfile that
+ describes what we want to upload.
+For SEARCH, this argument will be a configfile that 
+ holds the search terms that we are looking up.
+"""
+
 samplehelp = \
 """
 Writes a sample output file to stdout. 

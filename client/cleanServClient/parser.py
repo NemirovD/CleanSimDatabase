@@ -1,5 +1,10 @@
 import re
+import filewriter
+import fileloader
 import textwrap
+
+def parseConfig(filename):
+	return fileloader.loadFiles(parseFile(filename))
 
 def parseFile(filename):
 	datadict = {}
@@ -70,3 +75,5 @@ def parseResponse(res):
 		prettyPrintResponse(res)
 	elif res['type'] == 'textresponse':
 		print res['message']
+	elif res['type'] == 'file':
+		filewriter.writefile(res['name'],res['data'])

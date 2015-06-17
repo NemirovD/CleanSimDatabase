@@ -2,6 +2,7 @@ import os
 import json
 import hashlib
 from dbSetup import *
+from sockUtils import sendMessage, recvMessage
 
 def loadSecret():
 	try :
@@ -50,7 +51,7 @@ def registerUser(datadict, conn):
 		newUser.pword = p
 		newUser.save()
 		res['message'] = 'User Registered Successfully'
-	conn.sendall(json.dumps(res))
+	sendMessage(conn, json.dumps(res))
 	return
 
 def authenticateUser(datadict):
@@ -77,7 +78,7 @@ def addSimulation(datadict, conn):
 			descr = datadict['Description'][0]
 	else: 
 		result['message'] = 'A simulation must a description'
-		conn.sendall(json.dumps(result))
+		sendMessage(conn, json.dumps(result))
 		return
 
 	sim = Simulation(description=descr)
@@ -118,7 +119,7 @@ def addSimulation(datadict, conn):
 
 	
 	result['message'] = 'Added Successfully'
-	conn.sendall(json.dumps(result))
+	sendMessage(conn, json.dumps(result))
 	return
 
 def searchSimulations(datadict, conn):
@@ -131,7 +132,7 @@ def searchSimulations(datadict, conn):
 			'type' : 'textresponse',
 			'message' : 'You need to add Search terms to the config file.'
 		}
-		conn.sendall(json.dumps(res))
+		sendMessage(conn, json.dumps(res))
 		return
 	elif noKeywords:
 		query = Simulation.select(Simulation.id).\
@@ -197,8 +198,26 @@ def searchSimulations(datadict, conn):
 	else:
 		results['type'] = 'textresponse'
 		results['message'] = 'No Simulations found using search terms'
-	conn.sendall(json.dumps(results))
+	sendMessage(conn, json.dumps(results))
 	return
 
 def grabFile(datadict, conn):
-	pass
+	response = {}
+	if 'fileid' in datadict and datadict['fileid']:
+		query = File.select().where(File.id == datadict['fileid'])
+
+	if query.exists():
+		val = query.get()
+		f = open(val.path, 'r')
+		filetext = f.read()
+
+		response['type'] = 'file'
+		response['name'] = val.name
+		response['data'] = filetext
+	else:
+		response = {
+			'type' : 'textresponse',
+			'Message' : 'There are no files with that ID'
+		}
+	sendMessage(conn, json.dumps(response))
+	return
