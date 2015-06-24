@@ -86,3 +86,11 @@ inputfiles
 
 outputfiles
 """
+
+addEditorTutorial = \
+"""# Use this file to write a description for your simulation.
+# You can also add any missing keywords or files.
+# Any lines beginning with # will be Ignored
+#
+# ------------------Beginning Config File------------------
+"""

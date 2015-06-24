@@ -1,5 +1,6 @@
 import sys, tempfile, os
 import parser
+import strings
 from subprocess import call
 from getpass import getpass
 from types import ModuleType
@@ -84,6 +85,7 @@ def getDescriptionFromUser(configString):
 	newConfString = ""
 	EDITOR = os.environ.get('editor') if os.environ.get('editor') else 'nano'
 	with tempfile.NamedTemporaryFile(suffix=".tmp") as tmp:
+		tmp.write(strings.addEditorTutorial)
 		tmp.write(configString)
 		tmp.flush()
 		call([EDITOR, tmp.name])
