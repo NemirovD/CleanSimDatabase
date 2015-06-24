@@ -26,6 +26,7 @@ if args.sample_output:
 	print strings.samplefile
 	exit(0)
 
+extmodule = None
 if args.use_module and os.path.exists(args.use_module):
 	base = os.path.basename(args.use_module).split(".")[0]
 	extmodule = imp.load_source(base, args.use_module)
@@ -33,11 +34,12 @@ if args.use_module and os.path.exists(args.use_module):
 if not args.command:
 	commands.badArgs(parser)
 
+print args.use_module
+
 if args.use_module:
 	datadict = commands.enact(args.command, extmodule, parser)
 else:
 	datadict = commands.enact(args.command, args.command_arg, parser)
-
 
 #json data for sending
 message = json.dumps(datadict)
@@ -48,6 +50,7 @@ def connect():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock = ssl.wrap_socket(sock)
 	sock.connect(saddr)
+
 try:
 	connect()
 	sendMessage(sock, message)

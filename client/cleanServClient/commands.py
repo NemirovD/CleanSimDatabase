@@ -1,4 +1,6 @@
+import sys, tempfile, os
 import parser
+from subprocess import call
 from getpass import getpass
 from types import ModuleType
 from fileloader import loadSecret
@@ -36,9 +38,10 @@ def enact(command, command_arg, parser):
 	if command_arg:
 		if command == 'ADD' or command == 'SEARCH':
 			if type(command_arg) is ModuleType:
-				command_arg.run()
-				datadict.update(updateUsingConfig("addConfig.txt"))
-
+				configString = command_arg.run()
+				configString = getDescriptionFromUser(configString)
+				datadict.update(updateUsingModule(configString))
+				
 			else:
 				datadict.update(updateUsingConfig(command_arg))
 
@@ -76,8 +79,24 @@ def changepass(datadict):
 	datadict['nPass'] = pass1
 	return datadict
 
+def getDescriptionFromUser(configString):
+	import os
+	newConfString = ""
+	EDITOR = os.environ.get('editor') if os.environ.get('editor') else 'nano'
+	with tempfile.NamedTemporaryFile(suffix=".tmp") as tmp:
+		tmp.write(configString)
+		tmp.flush()
+		call([EDITOR, tmp.name])
+		tmp.seek(0)
+		newConfString = tmp.read()
+	return newConfString
+
+
 def updateUsingConfig(configFileName):
-	return parser.parseConfig(configFileName)
+	return parser.parseConfig(configFileName, False)
+
+def updateUsingModule(inputstring):
+	return parser.parseConfig(inputstring, True)
 
 def grab(command_arg):
 	return {'fileid' : int(command_arg)}

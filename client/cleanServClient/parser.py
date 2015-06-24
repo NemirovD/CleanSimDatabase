@@ -2,18 +2,23 @@ import re
 import filewriter
 import fileloader
 import textwrap
+from StringIO import StringIO
+from types import StringType
 
-def parseConfig(filename):
-	return fileloader.loadFiles(parseFile(filename))
+def parseConfig(filename, isStringFile):
+	f = None
+	if isStringFile:
+		f = iter(filename.splitlines())
+	else:
+		f = open(filename, 'r')
+	return fileloader.loadFiles(parseFile(f))
 
-def parseFile(filename):
+def parseFile(f):
 	datadict = {}
-	f = open(filename, 'r')
 	dtype = None
-
 	tlist = []
-	for line in f:
 
+	for line in f:
 		if not re.match('#*\s*.+', line):
 			# Line is empty
 			continue
