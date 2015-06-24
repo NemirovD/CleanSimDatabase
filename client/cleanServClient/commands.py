@@ -37,7 +37,7 @@ def enact(command, command_arg, parser):
 			badArgs(parser)
 
 	if command_arg:
-		if command == 'ADD' or command == 'SEARCH':
+		if command == 'ADD':
 			if type(command_arg) is ModuleType:
 				configString = command_arg.run()
 				configString = getDescriptionFromUser(configString)
@@ -55,6 +55,9 @@ def enact(command, command_arg, parser):
 			if not command_arg:
 				badArgs(parser)
 			datadict.update(graball(command_arg))
+
+		if command =='SEARCH':
+			datadict.update(updateUsingConfig(command_arg))
 
 		else:
 			badArgs(parser)
