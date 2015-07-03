@@ -18,7 +18,7 @@ def getLogin():
 	}
 	
 
-def enact(command, command_arg, parser):
+def enact(command, command_arg, parser, module=False):
 	datadict = {}
 
 	command = str(command).upper()
@@ -38,7 +38,7 @@ def enact(command, command_arg, parser):
 
 	if command_arg:
 		if command == 'ADD':
-			if type(command_arg) is ModuleType:
+			if type(command_arg) is ModuleType and module:
 				configString = command_arg.run()
 				configString = getDescriptionFromUser(configString)
 				datadict.update(updateUsingModule(configString))
@@ -56,11 +56,12 @@ def enact(command, command_arg, parser):
 				badArgs(parser)
 			datadict.update(graball(command_arg))
 
-		if command =='SEARCH':
+		elif command =='SEARCH':
 			datadict.update(updateUsingConfig(command_arg))
 
 		else:
 			badArgs(parser)
+
 		datadict.update(getLogin())
 	return datadict
 
