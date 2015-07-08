@@ -30,14 +30,14 @@ extmodule = None
 if args.use_module and os.path.exists(args.use_module):
 	base = os.path.basename(args.use_module).split(".")[0]
 	extmodule = imp.load_source(base, args.use_module)
-else:
-	print "Could not load module"
-	exit(0)
+	print extmodule
+	if extmodule is None:
+		print "Could not load module"
+		exit(0)
+
 
 if not args.command:
 	commands.badArgs(parser)
-
-print args.use_module
 
 if args.use_module:
 	datadict = commands.enact(args.command, extmodule, parser, module=True)
