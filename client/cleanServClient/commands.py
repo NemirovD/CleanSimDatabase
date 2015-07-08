@@ -40,6 +40,9 @@ def enact(command, command_arg, parser, module=False):
 		if command == 'ADD':
 			if type(command_arg) is ModuleType and module:
 				configString = command_arg.run()
+				if type(configString) is not str:
+					print "Invalid return type from module:", type(configString)
+					return exit(0)
 				configString = getDescriptionFromUser(configString)
 				datadict.update(updateUsingModule(configString))
 				

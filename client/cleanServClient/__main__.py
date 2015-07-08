@@ -27,12 +27,15 @@ if args.sample_output:
 	exit(0)
 
 extmodule = None
-if args.use_module and os.path.exists(args.use_module):
-	base = os.path.basename(args.use_module).split(".")[0]
-	extmodule = imp.load_source(base, args.use_module)
-	print extmodule
-	if extmodule is None:
-		print "Could not load module"
+if args.use_module:
+	if os.path.exists(args.use_module):
+		base = os.path.basename(args.use_module).split(".")[0]
+		extmodule = imp.load_source(base, args.use_module)
+		if not hasattr(extmodule, 'run'):
+			print "Invalid module:", args.use_module
+			exit(0)
+	else:
+		print "Could not load module:", args.use_module
 		exit(0)
 
 
