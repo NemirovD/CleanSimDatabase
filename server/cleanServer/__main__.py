@@ -2,10 +2,21 @@ import json
 import socket
 import strings
 import dbHandler
-from sockUtils import sendMessage, recvMessage
-from traceback import print_exc
 from OpenSSL import SSL
+from threading import Thread
+from traceback import print_exc
 from argparse import ArgumentParser 
+from sockUtils import sendMessage, recvMessage
+
+class WorkerThread(Thread):
+	def __init__(self, conn):
+		Thread.__init__(self)
+		self.conn = conn
+
+	def run(self):
+		message = recvMessage(self.conn)
+		datadict = json.loads(message)
+		parse(datadict, self.conn)
 
 def parse(datadict, conn):
 	mType = datadict['MessageType']
@@ -65,10 +76,9 @@ def main():
 		try:
 			print "Waiting for connection"
 			conn, addr = sock.accept()
-			message = recvMessage(conn)
 
-			datadict = json.loads(message)
-			parse(datadict, conn)
+			worker = WorkerThread(conn)
+			worker.run()
 
 			if conn != None:
 				conn.close()

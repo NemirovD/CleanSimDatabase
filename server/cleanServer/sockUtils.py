@@ -1,6 +1,6 @@
-def sendMessage(sock, message):
-	sock.sendall(bytes(long(len(message))))
-	sock.sendall(message)
+def sendMessage(conn, message):
+	conn.sendall(bytes(long(len(message))))
+	conn.sendall(message)
 
 def recvMessage(conn):
 	datalength = long(bytes(conn.recv(4096)))
